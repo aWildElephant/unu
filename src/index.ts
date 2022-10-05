@@ -2,11 +2,30 @@ import express from 'express'
 
 // Configuration
 const PORT = 12345
+const CODE = 'unu-gaming'
 
-const app = express()
+function generateCode(): string {
+    return CODE
+}
 
-app.use(express.json())
+async function startServer() {
+    const app = express()
 
-app.get('/', (_, res) => res.send('ok'))
+    app.use(express.json())
+    
+    const code = generateCode()
+    
+    app.get('/' + code, (_, res) => {
+        res.send('On est bon')
+    })
+    
+    app.get('*', (req, res) => {
+        const code = req.path.substring(1)
+        res.send(`Vous êtes bien sur un serveur UNU mais le code "${code}" est invalide. Redemandez l'URL à l'hôte.`)
+    })
+    
+    app.listen(PORT, () => console.log('Listening on port %d', PORT))
+}
 
-app.listen(PORT, () => console.log('Listening on port %d', PORT))
+
+startServer().then()
