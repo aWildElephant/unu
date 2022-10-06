@@ -11,7 +11,7 @@ enum CardNumber {
     NINE = 9
 }
 
-enum CardColor {
+export enum CardColor {
     BLUE,
     GREEN,
     RED,
@@ -124,11 +124,15 @@ export function deck(): Card[] {
     return deck
 }
 
-/**
- * @param arr the array to shuffle
- * @return the shuffled array
- */
-export function shuffle<T>(arr: T[]): T[] {
-    // TODO: implement the Fisher–Yates shuffle
-    return arr
+export function getColor(card: Card): CardColor | undefined {
+    switch (card.type) {
+        case "number":
+        case "draw-2":
+        case "swap":
+        case "skip-next-player":
+        case "change-direction":
+            return card.color
+        default:
+            return undefined
+    }
 }
