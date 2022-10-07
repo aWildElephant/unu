@@ -104,6 +104,9 @@ export class GameState {
             case "play":
                 console.log("Command 'play' not implemented") // TODO
                 break
+            case "skip":
+                console.log("Command 'skip' not implemented") // TODO
+                break
             case "unu":
                 console.log("Command 'unu' not implemented") // TODO
                 break
