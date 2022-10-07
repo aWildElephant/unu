@@ -2,7 +2,7 @@ type Predicate<T> = (element: T) => boolean
 
 export class CircularDoubleLinkedList<T> {
 
-    private backingArray: T[] = []
+    backingArray: T[] = []
     private position: number = 0
 
     submit(element: T): void {
