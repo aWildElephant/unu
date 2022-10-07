@@ -14,3 +14,11 @@ export class TooManyPlayers {
 export class GameAlreadyStarted {
     
 }
+
+export class NotYourTurn {
+
+}
+
+export class Impossible {
+    
+}

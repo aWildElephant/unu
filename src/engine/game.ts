@@ -3,16 +3,11 @@ import { shuffle } from '~/util/shuffle'
 import { Stack } from '~/util/stack'
 import { Card, CardColor, deck, getColor } from './card'
 import { Command } from './command'
-import { PlayerIdAlreadyExists, NotEnoughPlayers, TooManyPlayers, GameAlreadyStarted } from './exceptions'
+import { PlayerIdAlreadyExists, NotEnoughPlayers, NotYourTurn, TooManyPlayers, GameAlreadyStarted, Impossible } from './exceptions'
 
-class Player {
+class Hand {
 
-    unu: boolean = false
-
-    // TODO: implement hand class to wrap class (and make it easier to swap/rotate hands)
     private hand: Card[] = []
-
-    constructor(public id: string) { }
 
     addCard(card: Card): void {
         this.hand.push(card)
@@ -21,6 +16,15 @@ class Player {
     getCard(index: number): Card {
         return this.hand.splice(index, 1)[0]
     }
+}
+
+class Player {
+
+    unu: boolean = false
+
+    hand = new Hand()
+
+    constructor(public id: string) { }
 }
 
 export class GameState {
@@ -33,6 +37,7 @@ export class GameState {
 
     process(command: Command) {
         const type = command.type
+        let playerId: string
         switch (type) {
             case "add-player":
                 if (this.started) {
@@ -43,7 +48,7 @@ export class GameState {
                     throw new TooManyPlayers()
                 }
 
-                const playerId = command.playerId
+                playerId = command.playerId
 
                 if (this.players.findFirst(player => player.id === playerId)) {
                     throw new PlayerIdAlreadyExists(playerId)
@@ -64,7 +69,7 @@ export class GameState {
                 for (let i = 0; i < cardsToDistribute; i++) {
                     const card = stack.pop()
                     if (card) {
-                        this.players.head()?.addCard(card)
+                        this.players.head()?.hand.addCard(card)
                     }
                 }
 
@@ -81,7 +86,20 @@ export class GameState {
 
                 break
             case "draw":
-                console.log("Command 'draw' not implemented") // TODO
+                playerId = command.playerId
+
+                const currentPlayer = this.players.head()
+
+                if (!currentPlayer) {
+                    throw new Impossible()
+                }
+
+                if (currentPlayer.id !== playerId) {
+                    throw new NotYourTurn()
+                }
+
+                currentPlayer.hand.addCard(this.drawCard())
+                
                 break
             case "play":
                 console.log("Command 'play' not implemented") // TODO
@@ -91,6 +109,25 @@ export class GameState {
                 break
             default:
                 console.error(`Command '${type}' unknown`) // TODO
+        }
+    }
+
+    private drawCard(): Card {
+        const card = this.remainingCards.pop()
+
+        if (card) {
+            return card    
+        }
+
+        this.repurposePlayedCards()
+
+        return this.drawCard()
+    }
+
+    private repurposePlayedCards(): void {
+        let card
+        while ((card = this.playedCards.pop()) != undefined) {
+            this.remainingCards.push(card)
         }
     }
 }
