@@ -18,7 +18,7 @@ class Hand {
 
 export class Player {
 
-    unu: boolean = false
+    unu = false
 
     hand = new Hand()
 

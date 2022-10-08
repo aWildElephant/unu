@@ -5,6 +5,21 @@ import { Event } from "./event"
 import { PlayerIdAlreadyExists, NotEnoughPlayers, NotYourTurn, TooManyPlayers, InvalidGameStatus } from './exceptions'
 import { GameState, GameStatus, Player } from "./game";
 
+function applyCardDrawnEvent(gameState: GameState): void {
+    const card = gameState.remainingCards.pop()
+    if (card) {
+        // TODO: get player by id instead of getting current
+        gameState.players.head()?.hand.addCard(card)
+    }
+}
+
+function applyFirstCardSetEvent(gameState: GameState): void {
+    const card = gameState.remainingCards.pop()
+    if (card) {
+        gameState.playedCards.push(card)
+    }
+}
+
 function applyEvent(gameState: GameState, event: Event): void {
     const type = event.type
 
@@ -16,20 +31,13 @@ function applyEvent(gameState: GameState, event: Event): void {
             gameState.repurposePlayedCards()
             break
         case "card-drawn":
-            const card = gameState.remainingCards.pop()
-            if (card) {
-                // TODO: get player by id instead of getting current
-                gameState.players.head()?.hand.addCard(card)
-            }
+            applyCardDrawnEvent(gameState)
             break
         case "card-added-to-deck":
             gameState.remainingCards.push(event.card)
             break
         case "first-card-set":
-            const firstCard = gameState.remainingCards.pop()
-            if (firstCard) {
-                gameState.playedCards.push(firstCard)
-            }
+            applyFirstCardSetEvent(gameState)
             break
         default:
             console.error("Unsupported event '%s'", type)
@@ -47,7 +55,7 @@ export class Application {
     process(command: Command): Event[] {
         const events = this.validate(command)
 
-        for (let event of events) {
+        for (const event of events) {
             this.apply(event)
         }
 
@@ -150,17 +158,9 @@ export class Application {
                 })
 
                 break
-            case "play":
-                console.log("Command 'play' not implemented") // TODO
-                break
-            case "skip":
-                console.log("Command 'skip' not implemented") // TODO
-                break
-            case "unu":
-                console.log("Command 'unu' not implemented") // TODO
-                break
             default:
-                console.error(`Command '${type}' unknown`) // TODO
+                // TODO
+                throw new Error(`Command '${type}' not implemented`)
         }
 
         return events

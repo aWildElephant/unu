@@ -2,7 +2,7 @@ function randomBetween(min: number, max: number): number {
     return Math.floor(Math.random() * (max - min + 1) + min)
 }
 
-function exchange(arr: any[], i: number, j: number): void {
+function exchange<T>(arr: T[], i: number, j: number): void {
     const v = arr[i]
 
     arr[i] = arr[j]

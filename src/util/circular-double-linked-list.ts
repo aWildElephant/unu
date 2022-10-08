@@ -1,9 +1,12 @@
 type Predicate<T> = (element: T) => boolean
 
+/**
+ * Not really a linked list :°)
+ */
 export class CircularDoubleLinkedList<T> {
 
     backingArray: T[] = []
-    private position: number = 0
+    private position = 0
 
     submit(element: T): void {
         this.backingArray.push(element)
