@@ -12,7 +12,8 @@ function exchange<T>(arr: T[], i: number, j: number): void {
 /**
  * Fisher-Yates shuffle
  * 
- * @param input the array to shuffle in-place
+ * @param input the array to shuffle
+ * @return a shuffled copy of the input array
  */
  export function shuffle<T>(input: T[]): T[] {
     const copy = [...input]
