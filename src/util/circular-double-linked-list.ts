@@ -2,6 +2,8 @@ type Predicate<T> = (element: T) => boolean
 
 /**
  * Not really a linked list :°)
+ *
+ * TODO: we don't need this, just use an array and let GameState/parent structure manage player order
  */
 export class CircularDoubleLinkedList<T> {
 
