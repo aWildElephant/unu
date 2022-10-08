@@ -47,14 +47,17 @@ export class Application {
     process(command: Command): Event[] {
         const events = this.validate(command)
 
-        events.forEach(this.apply)
+        for (let event of events) {
+            this.apply(event)
+        }
 
         this.store.push(command)
 
         return events
     }
 
-    private apply(event: Event): void {
+    // Visible for testing
+    apply(event: Event): void {
         applyEvent(this.gameState, event)
     }
 
