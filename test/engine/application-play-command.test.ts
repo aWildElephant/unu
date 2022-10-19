@@ -4,7 +4,29 @@ import { Card, CardColor, CardNumber, ChangeDirectionCard, Draw2Card, NumberCard
 import { Command } from "~/engine/command"
 
 describe('Play command', function () {
-    // TODO: test that a player cannot play a card that is not in his hand
+    it("should throw an error if the player tries to play a card that isn't in his hand", () => {
+        const application = new Application()
+        application.apply({
+            type: "player-added",
+            playerId: "p"
+        })
+        application.apply({
+            type: "card-played",
+            card: new NumberCard(CardNumber.ONE, CardColor.BLUE)
+        })
+        application.apply({
+            type: "card-added-to-hand",
+            playerId: "p",
+            card: new NumberCard(CardNumber.TWO, CardColor.RED)
+        })
+
+        const command: Command = {
+            type: "play",
+            playerId: "p",
+            card: new Draw2Card(CardColor.BLUE)
+        }
+        expect(() => application.process(command)).to.throw()
+    })
 
     // TODO: test that a player cannot play if it isn't his turn (unless he's cutting)
 
@@ -32,9 +54,8 @@ describe('Play command', function () {
     ]
 
     for (const scenario of scenarios) {
-        it(`Playing ${scenario.played.name()} after ${scenario.previous.name()}`, () => {
+        it(`playing ${scenario.played.name()} after ${scenario.previous.name()}`, () => {
             const application = new Application()
-
             application.apply({
                 type: "player-added",
                 playerId: "p"

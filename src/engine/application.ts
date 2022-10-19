@@ -2,21 +2,21 @@ import { shuffle } from "~/util/shuffle";
 import { deck, Card, ColoredCard, NumberCard, Draw2Card } from "./card";
 import { Command } from "./command";
 import { Event } from "./event"
-import { PlayerIdAlreadyExists, NotEnoughPlayers, NotYourTurn, TooManyPlayers, InvalidGameStatus, InvalidCard } from './exceptions'
+import { PlayerIdAlreadyExists, NotEnoughPlayers, NotYourTurn, TooManyPlayers, InvalidGameStatus, InvalidCard, PlayerDoesNotHaveCard } from './exceptions'
 import { GameState, GameStatus, Player } from "./game";
 
 function applyCardAddedToHand(gameState: GameState, card: Card, playerId: string): void {
-    gameState.players.get(playerId)?.hand.addCard(card)
+    gameState.players.get(playerId)?.hand.add(card)
 }
 
 function applyCardRemovedFromHand(gameState: GameState, playerId: string, card: Card): void {
-    // TODO
+    gameState.players.get(playerId)?.hand.remove(card)
 }
 
 function applyCardDrawnEvent(gameState: GameState, playerId: string): void {
     const card = gameState.remainingCards.pop()
     if (card) {
-        gameState.players.get(playerId)?.hand?.addCard(card)
+        gameState.players.get(playerId)?.hand?.add(card)
     }
 }
 
@@ -179,13 +179,15 @@ export class Application {
 
                 break
             case "play":
-                // TODO: check that the game is in the right state (no player has drawn from deck)
+                // TODO: check that the game is in the right state
 
                 // TODO: implement cutting
 
-                if (this.canPlay(command.card)) {
-                    // TODO: check that the player actually has the card
+                if (!this.gameState.currentPlayer().hand.contains(command.card)) {
+                    throw new PlayerDoesNotHaveCard(command.card)
+                }
 
+                if (this.canPlay(command.card)) {
                     events.push({
                         type: "card-removed-from-hand",
                         card: command.card,
@@ -196,6 +198,8 @@ export class Application {
                         type: "card-played",
                         card: command.card
                     })
+
+                    // TODO: next player
                 } else {
                     throw new InvalidCard(command.card)
                 }

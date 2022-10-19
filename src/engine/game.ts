@@ -1,13 +1,22 @@
 import { Stack } from '~/util/stack'
 import { Card } from './card'
-import { Impossible } from './exceptions'
+
+const _ = require("lodash")
 
 class Hand {
 
-    private hand: Card[] = []
+    private cards: Card[] = []
 
-    addCard(card: Card): void {
-        this.hand.push(card)
+    add(card: Card): void {
+        this.cards.push(card)
+    }
+
+    contains(card: Card): boolean {
+        return !!_.find(this.cards, (c: Card) => _.isEqual(c, card))
+    }
+
+    remove(card: Card): void {
+        this.cards = _.remove(this.cards, (c: Card) => _.isEqual(c, card))
     }
 }
 

@@ -32,6 +32,13 @@ export class Impossible {
 export class InvalidCard {
 
     constructor(public card: Card) {
-        
+
+    }
+}
+
+export class PlayerDoesNotHaveCard {
+
+    constructor(public card: Card) {
+
     }
 }
