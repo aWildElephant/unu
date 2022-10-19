@@ -2,7 +2,7 @@ import { Card } from "./card";
 import { GameStatus } from "./game";
 
 export class PlayerIdAlreadyExists {
- 
+
     constructor(public id: string) { }
 }
 

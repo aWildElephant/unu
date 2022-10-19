@@ -15,7 +15,7 @@ function exchange<T>(arr: T[], i: number, j: number): void {
  * @param input the array to shuffle
  * @return a shuffled copy of the input array
  */
- export function shuffle<T>(input: T[]): T[] {
+export function shuffle<T>(input: T[]): T[] {
     const copy = [...input]
 
     const length = input.length

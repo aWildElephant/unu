@@ -29,7 +29,7 @@ describe('Processing of commands', function () {
 
             const command = addPlayerCommand("p1")
 
-            const expected = [ playerAddedEvent("p1") ]
+            const expected = [playerAddedEvent("p1")]
 
             expect(app.process(command)).to.deep.equal(expected)
         })
