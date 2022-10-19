@@ -1,16 +1,27 @@
 import { shuffle } from "~/util/shuffle";
-import { deck } from "./card";
+import { deck, Card, ColoredCard, NumberCard, Draw2Card } from "./card";
 import { Command } from "./command";
 import { Event } from "./event"
-import { PlayerIdAlreadyExists, NotEnoughPlayers, NotYourTurn, TooManyPlayers, InvalidGameStatus } from './exceptions'
+import { PlayerIdAlreadyExists, NotEnoughPlayers, NotYourTurn, TooManyPlayers, InvalidGameStatus, InvalidCard } from './exceptions'
 import { GameState, GameStatus, Player } from "./game";
 
-function applyCardDrawnEvent(gameState: GameState): void {
+function applyCardAddedToHand(gameState: GameState, card: Card, playerId: string): void {
+    gameState.players.get(playerId)?.hand.addCard(card)
+}
+
+function applyCardRemovedFromHand(gameState: GameState, playerId: string, card: Card): void {
+    // TODO
+}
+
+function applyCardDrawnEvent(gameState: GameState, playerId: string): void {
     const card = gameState.remainingCards.pop()
     if (card) {
-        // TODO: get player by id instead of getting current
-        gameState.players.head()?.hand.addCard(card)
+        gameState.players.get(playerId)?.hand?.addCard(card)
     }
+}
+
+function applyCardPlayedEvent(gameState: GameState, card: Card): void {
+    gameState.playedCards.push(card)
 }
 
 function applyFirstCardSetEvent(gameState: GameState): void {
@@ -25,16 +36,25 @@ function applyEvent(gameState: GameState, event: Event): void {
 
     switch (type) {
         case "player-added":
-            gameState.players.submit(new Player(event.playerId))
+            gameState.players.add(new Player(event.playerId))
             break
         case "played-cards-repurposed":
             gameState.repurposePlayedCards()
             break
         case "card-drawn":
-            applyCardDrawnEvent(gameState)
+            applyCardDrawnEvent(gameState, event.playerId)
+            break
+        case "card-played":
+            applyCardPlayedEvent(gameState, event.card)
             break
         case "card-added-to-deck":
             gameState.remainingCards.push(event.card)
+            break
+        case "card-added-to-hand":
+            applyCardAddedToHand(gameState, event.card, event.playerId)
+            break
+        case "card-removed-from-hand":
+            applyCardRemovedFromHand(gameState, event.playerId, event.card)
             break
         case "first-card-set":
             applyFirstCardSetEvent(gameState)
@@ -83,7 +103,7 @@ export class Application {
                 }
 
                 // There is a maximum of 10 players
-                if (this.gameState.numberOfPlayers() >= 10) {
+                if (this.gameState.playerCount() >= 10) {
                     throw new TooManyPlayers()
                 }
 
@@ -101,7 +121,7 @@ export class Application {
                 break
             case "start":
                 // There is a minimum of 2 players
-                if (this.gameState.numberOfPlayers() < 2) {
+                if (this.gameState.playerCount() < 2) {
                     throw new NotEnoughPlayers()
                 }
 
@@ -158,11 +178,52 @@ export class Application {
                 })
 
                 break
+            case "play":
+                // TODO: check that the game is in the right state (no player has drawn from deck)
+
+                // TODO: implement cutting
+
+                if (this.canPlay(command.card)) {
+                    // TODO: check that the player actually has the card
+
+                    events.push({
+                        type: "card-removed-from-hand",
+                        card: command.card,
+                        playerId: command.playerId
+                    })
+
+                    events.push({
+                        type: "card-played",
+                        card: command.card
+                    })
+                } else {
+                    throw new InvalidCard(command.card)
+                }
+
+                break;
             default:
                 // TODO
                 throw new Error(`Command '${type}' not implemented`)
         }
 
         return events
+    }
+
+    private canPlay(card: Card): boolean {
+        const lastCard = this.gameState.playedCards.peek()
+
+        if (lastCard instanceof NumberCard && card instanceof NumberCard && lastCard.num === card.num) {
+            return true
+        }
+
+        if (lastCard instanceof ColoredCard && card instanceof ColoredCard && lastCard.color === card.color) {
+            return true
+        }
+
+        if (lastCard instanceof Draw2Card && card instanceof Draw2Card) {
+            return true
+        }
+
+        return false
     }
 }

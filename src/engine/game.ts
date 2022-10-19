@@ -1,4 +1,3 @@
-import { CircularDoubleLinkedList } from '~/util/circular-double-linked-list'
 import { Stack } from '~/util/stack'
 import { Card } from './card'
 import { Impossible } from './exceptions'
@@ -9,10 +8,6 @@ class Hand {
 
     addCard(card: Card): void {
         this.hand.push(card)
-    }
-
-    getCard(index: number): Card {
-        return this.hand.splice(index, 1)[0]
     }
 }
 
@@ -25,6 +20,36 @@ export class Player {
     constructor(public id: string) { }
 }
 
+export class Players {
+
+    players: Player[] = []
+    currentIndex = 0
+
+    exists(id: string): boolean {
+        return this.get(id) != null
+    }
+
+    get(id: string): Player | null {
+        const match = this.players.filter(player => player.id === id)
+
+        if (match.length > 0) {
+            return match[0]
+        } else {
+            return null
+        }
+    }
+
+    count(): number {
+        return this.players.length
+    }
+
+    add(player: Player): void {
+        if (this.get(player.id) == null) {
+            this.players.push(player)
+        }
+    }
+}
+
 export enum GameStatus {
     WAITING,
     IN_PROGRESS,
@@ -33,32 +58,26 @@ export enum GameStatus {
 
 export class GameState {
 
-    players: CircularDoubleLinkedList<Player> = new CircularDoubleLinkedList()
-    playedCards: Stack<Card>
+    players = new Players()
+    playedCards: Stack<Card> = new Stack()
     remainingCards: Stack<Card>
 
     status: GameStatus = GameStatus.WAITING
 
-    numberOfPlayers(): number {
-        return this.players.size()
+    playerCount(): number {
+        return this.players.count()
     }
 
     playerExists(id: string): boolean {
-        return this.players.findFirst(player => player.id === id) !== undefined
+        return this.players.exists(id)
     }
 
     playerIds(): string[] {
-        return this.players.backingArray.map(player => player.id)
+        return this.players.players.map(player => player.id)
     }
 
     currentPlayer(): Player {
-        const player = this.players.head()
-
-        if (!player) {
-            throw new Impossible()
-        }
-
-        return player
+        return this.players.players[0]
     }
 
     repurposePlayedCards(): void {

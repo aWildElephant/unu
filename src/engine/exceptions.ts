@@ -1,3 +1,4 @@
+import { Card } from "./card";
 import { GameStatus } from "./game";
 
 export class PlayerIdAlreadyExists {
@@ -26,4 +27,11 @@ export class NotYourTurn {
 
 export class Impossible {
 
+}
+
+export class InvalidCard {
+
+    constructor(public card: Card) {
+        
+    }
 }

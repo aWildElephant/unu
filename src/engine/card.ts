@@ -1,4 +1,4 @@
-enum CardNumber {
+export enum CardNumber {
     ZERO = 0,
     ONE = 1,
     TWO = 2,
@@ -12,21 +12,90 @@ enum CardNumber {
 }
 
 export enum CardColor {
-    BLUE,
-    GREEN,
-    RED,
-    YELLOW
+    BLUE = "blue",
+    GREEN = "green",
+    RED = "red",
+    YELLOW = "yellow"
 }
 
-export type Card = { type: "number", num: CardNumber, color: CardColor }
-    | { type: "joker" }
-    | { type: "draw-2", color: CardColor }
-    | { type: "draw-4" }
-    | { type: "swap", color: CardColor }
-    | { type: "choose-color" }
-    | { type: "skip-next-player", color: CardColor }
-    | { type: "rotate-hands" }
-    | { type: "change-direction", color: CardColor }
+export interface Card {
+
+    name(): string
+}
+
+export class Draw4Card implements Card {
+
+    name(): string {
+        return "draw 4 card"
+    }
+}
+
+export class JokerCard implements Card {
+
+    name(): string {
+        return "joker card"
+    }
+}
+
+export class RotateCard implements Card {
+
+    name(): string {
+        return "rotate card"
+    }
+}
+
+export abstract class ColoredCard implements Card {
+
+    constructor(public color: CardColor) {
+
+    }
+
+    abstract name(): string
+}
+
+export class NumberCard extends ColoredCard {
+
+    constructor(public num: CardNumber, color: CardColor) {
+        super(color)
+    }
+
+    name(): string {
+        return `${this.color} ${this.num} card`
+    }
+}
+
+export class Draw2Card extends ColoredCard {
+
+    constructor(color: CardColor) {
+        super(color)
+    }
+
+    name(): string {
+        return `${this.color} draw 2 card`
+    }
+}
+
+export class SkipNextPlayerCard extends ColoredCard {
+
+    constructor(color: CardColor) {
+        super(color)
+    }
+
+    name(): string {
+        return `${this.color} skip next card`
+    }
+}
+
+export class ChangeDirectionCard extends ColoredCard {
+
+    constructor(color: CardColor) {
+        super(color)
+    }
+
+    name(): string {
+        return `${this.color} change direction card`
+    }
+}
 
 /**
  * Build all cards for a specific color
@@ -37,46 +106,21 @@ export type Card = { type: "number", num: CardNumber, color: CardColor }
 function coloredCards(color: CardColor): Card[] {
     const cards: Card[] = []
 
-    cards.push({
-        type: "number",
-        num: CardNumber.ZERO,
-        color
-    })
+    cards.push(new NumberCard(CardNumber.ZERO, color))
 
     for (let i = CardNumber.ONE; i <= CardNumber.NINE; i++) {
-        const card: Card = {
-            type: "number",
-            num: i,
-            color
-        }
-
-        cards.push(card)
-        cards.push(card)
+        cards.push(new NumberCard(i, color))
+        cards.push(new NumberCard(i, color))
     }
 
-    const plus2Card: Card = {
-        type: "draw-2",
-        color
-    }
+    cards.push(new Draw2Card(color))
+    cards.push(new Draw2Card(color))
 
-    cards.push(plus2Card)
-    cards.push(plus2Card)
+    cards.push(new SkipNextPlayerCard(color))
+    cards.push(new SkipNextPlayerCard(color))
 
-    const skipNextPlayerCard: Card = {
-        type: "skip-next-player",
-        color
-    }
-
-    cards.push(skipNextPlayerCard)
-    cards.push(skipNextPlayerCard)
-
-    const changeDirectionCard: Card = {
-        type: "change-direction",
-        color
-    }
-
-    cards.push(changeDirectionCard)
-    cards.push(changeDirectionCard)
+    cards.push(new ChangeDirectionCard(color))
+    cards.push(new ChangeDirectionCard(color))
 
     return cards
 }
@@ -94,45 +138,28 @@ export function deck(): Card[] {
     deck = deck.concat(coloredCards(CardColor.RED))
     deck = deck.concat(coloredCards(CardColor.YELLOW))
 
-    const jokerCard: Card = {
-        type: "joker"
-    }
+    deck.push(new JokerCard())
+    deck.push(new JokerCard())
+    deck.push(new JokerCard())
+    deck.push(new JokerCard())
 
-    deck.push(jokerCard)
-    deck.push(jokerCard)
-    deck.push(jokerCard)
-    deck.push(jokerCard)
+    deck.push(new Draw4Card())
+    deck.push(new Draw4Card())
+    deck.push(new Draw4Card())
+    deck.push(new Draw4Card())
 
-    const draw4Card: Card = {
-        type: "draw-4"
-    }
-
-    deck.push(draw4Card)
-    deck.push(draw4Card)
-    deck.push(draw4Card)
-    deck.push(draw4Card)
-
-    const rotateHandsCard: Card = {
-        type: "rotate-hands"
-    }
-
-    deck.push(rotateHandsCard)
-    deck.push(rotateHandsCard)
-    deck.push(rotateHandsCard)
-    deck.push(rotateHandsCard)
+    deck.push(new RotateCard())
+    deck.push(new RotateCard())
+    deck.push(new RotateCard())
+    deck.push(new RotateCard())
 
     return deck
 }
 
 export function getColor(card: Card): CardColor | undefined {
-    switch (card.type) {
-        case "number":
-        case "draw-2":
-        case "swap":
-        case "skip-next-player":
-        case "change-direction":
-            return card.color
-        default:
-            return undefined
+    if (card instanceof ColoredCard) {
+        return card.color
+    } else {
+        return undefined
     }
 }

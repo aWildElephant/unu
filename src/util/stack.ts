@@ -14,14 +14,10 @@ export class Stack<T> {
         this.backingArray.push(element)
     }
 
-    peek(): T | undefined {
+    peek(): T {
         const size = this.size()
 
-        if (size > 0) {
-            return this.backingArray[size - 1]
-        } else {
-            return undefined
-        }
+        return this.backingArray[size - 1]
     }
 
     pop(): T | undefined {
