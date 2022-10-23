@@ -3,8 +3,7 @@ import { Application } from "~/engine/application"
 import { Card, CardColor, CardNumber, ChangeDirectionCard, Draw2Card, NumberCard } from "~/engine/card"
 import { Command } from "~/engine/command"
 
-// TODO: ça serait bien d'avoir ça dans la catégorie "Processing of commands"
-describe('Play command', function () {
+describe('Processing of commands: play', function () {
     it("should throw an error if the player tries to play a card that isn't in his hand", () => {
         const application = new Application()
         application.apply({

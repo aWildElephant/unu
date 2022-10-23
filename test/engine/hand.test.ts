@@ -6,7 +6,7 @@ import { CardColor, CardNumber, NumberCard } from "~/engine/card";
 
 describe('Hand', function () {
 
-    describe('contains', function () {
+    describe('#contains', function () {
 
         it('should return true if the hand contains the given card', function () {
             const hand = new Hand()
@@ -25,7 +25,7 @@ describe('Hand', function () {
         })
     })
 
-    describe('remove', function () {
+    describe('#remove', function () {
 
         it('should remove only one instance of the card if several exist', function () {
             const hand = new Hand()
