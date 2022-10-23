@@ -1,9 +1,10 @@
-import { shuffle } from "~/util/shuffle";
-import { deck, Card, ColoredCard, NumberCard, Draw2Card } from "./card";
-import { Command } from "./command";
+import { shuffle } from "~/util/shuffle"
+import { deck, Card, ColoredCard, NumberCard, Draw2Card } from "./card"
+import { Command } from "./command"
 import { Event } from "./event"
 import { PlayerIdAlreadyExists, NotEnoughPlayers, NotYourTurn, TooManyPlayers, InvalidGameStatus, InvalidCard, PlayerDoesNotHaveCard, Impossible } from './exceptions'
-import { GameState, GameStatus, Player } from "./game";
+import { GameState, GameStatus } from "./game"
+import { Player } from "./players"
 
 function applyCardAddedToHand(gameState: GameState, card: Card, playerId: string): void {
     gameState.players.get(playerId)?.hand.add(card)
@@ -41,10 +42,10 @@ function applyEvent(gameState: GameState, event: Event): void {
             applyCardPlayedEvent(gameState, event.card)
             break
         case "card-added-to-deck":
-                gameState.remainingCards.push(event.card)
+            gameState.remainingCards.push(event.card)
             break
         case "card-added-to-hand":
-                applyCardAddedToHand(gameState, event.card, event.playerId)
+            applyCardAddedToHand(gameState, event.card, event.playerId)
             break
         case "card-removed-from-hand":
             applyCardRemovedFromHand(gameState, event.playerId, event.card)
@@ -221,12 +222,15 @@ export class Application {
         return events
     }
 
+    /**
+     * Return the last element of an array that is not empty. Throws if the array is empty
+     */
     private last<T>(arr: T[]): T {
         const element = arr.pop()
         if (!element) {
             throw new Impossible()
         }
-        return element 
+        return element
     }
 
     private canPlay(card: Card): boolean {

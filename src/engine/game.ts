@@ -1,63 +1,6 @@
 import { Stack } from '~/util/stack'
 import { Card } from './card'
-
-const _ = require("lodash")
-
-class Hand {
-
-    private cards: Card[] = []
-
-    add(card: Card): void {
-        this.cards.push(card)
-    }
-
-    contains(card: Card): boolean {
-        return !!_.find(this.cards, (c: Card) => _.isEqual(c, card))
-    }
-
-    remove(card: Card): void {
-        this.cards = _.remove(this.cards, (c: Card) => _.isEqual(c, card))
-    }
-}
-
-export class Player {
-
-    unu = false
-
-    hand = new Hand()
-
-    constructor(public id: string) { }
-}
-
-export class Players {
-
-    players: Player[] = []
-    currentIndex = 0
-
-    exists(id: string): boolean {
-        return this.get(id) != null
-    }
-
-    get(id: string): Player | null {
-        const match = this.players.filter(player => player.id === id)
-
-        if (match.length > 0) {
-            return match[0]
-        } else {
-            return null
-        }
-    }
-
-    count(): number {
-        return this.players.length
-    }
-
-    add(player: Player): void {
-        if (this.get(player.id) == null) {
-            this.players.push(player)
-        }
-    }
-}
+import { Player, Players } from './players'
 
 export enum GameStatus {
     WAITING,
