@@ -2,7 +2,7 @@ import { shuffle } from "~/util/shuffle";
 import { deck, Card, ColoredCard, NumberCard, Draw2Card } from "./card";
 import { Command } from "./command";
 import { Event } from "./event"
-import { PlayerIdAlreadyExists, NotEnoughPlayers, NotYourTurn, TooManyPlayers, InvalidGameStatus, InvalidCard, PlayerDoesNotHaveCard } from './exceptions'
+import { PlayerIdAlreadyExists, NotEnoughPlayers, NotYourTurn, TooManyPlayers, InvalidGameStatus, InvalidCard, PlayerDoesNotHaveCard, Impossible } from './exceptions'
 import { GameState, GameStatus, Player } from "./game";
 
 function applyCardAddedToHand(gameState: GameState, card: Card, playerId: string): void {
@@ -24,13 +24,6 @@ function applyCardPlayedEvent(gameState: GameState, card: Card): void {
     gameState.playedCards.push(card)
 }
 
-function applyFirstCardSetEvent(gameState: GameState): void {
-    const card = gameState.remainingCards.pop()
-    if (card) {
-        gameState.playedCards.push(card)
-    }
-}
-
 function applyEvent(gameState: GameState, event: Event): void {
     const type = event.type
 
@@ -48,16 +41,13 @@ function applyEvent(gameState: GameState, event: Event): void {
             applyCardPlayedEvent(gameState, event.card)
             break
         case "card-added-to-deck":
-            gameState.remainingCards.push(event.card)
+                gameState.remainingCards.push(event.card)
             break
         case "card-added-to-hand":
-            applyCardAddedToHand(gameState, event.card, event.playerId)
+                applyCardAddedToHand(gameState, event.card, event.playerId)
             break
         case "card-removed-from-hand":
             applyCardRemovedFromHand(gameState, event.playerId, event.card)
-            break
-        case "first-card-set":
-            applyFirstCardSetEvent(gameState)
             break
         default:
             console.error("Unsupported event '%s'", type)
@@ -129,13 +119,6 @@ export class Application {
 
                 const cards = shuffle(deck())
 
-                cards.forEach(card => {
-                    events.push({
-                        type: "card-added-to-deck",
-                        card
-                    })
-                })
-
                 // Draw 7 cards for each player
 
                 const playerIds = this.gameState.playerIds()
@@ -143,17 +126,42 @@ export class Application {
                 for (let i = 0; i < 7; i++) {
                     playerIds.forEach(playerId => {
                         events.push({
-                            type: "card-drawn",
-                            playerId
+                            type: "card-added-to-hand",
+                            playerId,
+                            card: this.last(cards)
                         })
                     })
                 }
 
-                // Set first card
+                // Set the first card, it must be colored so that the first player knows what to play
 
-                events.push({
-                    type: "first-card-set"
-                })
+                let firstCardSet = false
+                do {
+                    const card = this.last(cards)
+
+                    if (card instanceof ColoredCard) {
+                        events.push({
+                            type: "card-played",
+                            card
+                        })
+
+                        firstCardSet = true
+                    } else {
+                        events.push({
+                            type: "card-added-to-deck",
+                            card
+                        })
+                    }
+                } while (!firstCardSet)
+
+                // Put remaining cards in the deck
+
+                for (const card of cards) {
+                    events.push({
+                        type: "card-added-to-deck",
+                        card
+                    })
+                }
 
                 break
             case "draw":
@@ -211,6 +219,14 @@ export class Application {
         }
 
         return events
+    }
+
+    private last<T>(arr: T[]): T {
+        const element = arr.pop()
+        if (!element) {
+            throw new Impossible()
+        }
+        return element 
     }
 
     private canPlay(card: Card): boolean {
