@@ -15,6 +15,14 @@ export class Hand {
     }
 
     remove(card: Card): void {
-        this.cards = _.remove(this.cards, (c: Card) => _.isEqual(c, card))
+        const index = _.findIndex(this.cards, (c: Card) => _.isEqual(c, card))
+
+        if (index >= 0) {
+            this.cards.splice(index, 1)
+        }
+    }
+
+    size(): number {
+        return this.cards.length
     }
 }
