@@ -171,7 +171,7 @@ export class Application {
                 const drawingPlayerId = command.playerId
 
                 // Only current player can draw a card
-                if (currentPlayer.id !== drawingPlayerId) {
+                if (currentPlayer?.id !== drawingPlayerId) {
                     throw new NotYourTurn()
                 }
 
@@ -192,7 +192,7 @@ export class Application {
 
                 // TODO: implement cutting
 
-                if (!this.gameState.currentPlayer().hand.contains(command.card)) {
+                if (!this.gameState.currentPlayer()?.hand.contains(command.card)) {
                     throw new PlayerDoesNotHaveCard(command.card)
                 }
 

@@ -25,11 +25,11 @@ export class GameState {
     }
 
     playerIds(): string[] {
-        return this.players.players.map(player => player.id)
+        return this.players.getOrder()
     }
 
-    currentPlayer(): Player {
-        return this.players.players[0]
+    currentPlayer(): Player | undefined {
+        return this.players.getCurrent()
     }
 
     repurposePlayedCards(): void {
