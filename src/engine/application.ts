@@ -1,3 +1,4 @@
+import _ from "lodash"
 import { shuffle } from "~/util/shuffle"
 import { deck, Card, ColoredCard, NumberCard, Draw2Card } from "./card"
 import { Command } from "./command"
@@ -190,9 +191,11 @@ export class Application {
             case "play":
                 // TODO: check that the game is in the right state
 
-                // TODO: implement cutting
+                if (this.gameState.currentPlayer()?.id !== command.playerId && !_.isEqual(this.gameState.playedCards.peek(), command.card)) {
+                    throw new NotYourTurn()
+                }
 
-                if (!this.gameState.currentPlayer()?.hand.contains(command.card)) {
+                if (!this.gameState.players.get(command.playerId)?.hand.contains(command.card)) {
                     throw new PlayerDoesNotHaveCard(command.card)
                 }
 
